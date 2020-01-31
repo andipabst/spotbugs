@@ -13,6 +13,7 @@ subprojects {
   apply from: "$rootDir/gradle/eclipse.gradle"
   apply from: "$rootDir/gradle/idea.gradle"
   apply from: "$rootDir/gradle/test.gradle"
+  apply from: "$rootDir/gradle/pmd.gradle"
   if (!project.name.equals("spotbugsTestCases")) {
     apply from: "$rootDir/gradle/spotless.gradle"
   }
@@ -59,3 +60,13 @@ task jacocoRootReport(type: JacocoReport) {
 }
 
 apply from: "$rootDir/gradle/sonar.gradle"
+
+clean {
+  delete "cp.txt"
+}
+
+subprojects {
+  task printcp {
+    new File(rootDir, "cp.txt").append(":" + sourceSets.main.runtimeClasspath.join(':'))
+  }
+}
