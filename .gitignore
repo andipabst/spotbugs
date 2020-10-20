@@ -13,6 +13,7 @@ classesEclipse
 deps/
 eclipse/
 bin/
+cp.txt
 
 # to sign eclipse plugin
 spotbugs.jks
