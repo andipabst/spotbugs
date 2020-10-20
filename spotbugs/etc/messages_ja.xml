@@ -172,6 +172,13 @@ SpotBugs の以前のバージョンでは，このカテゴリは Style とし�
   Detectors
   **********************************************************************
    -->
+  <Detector class="edu.umd.cs.findbugs.detect.OverridingMethodsMustInvokeSuperDetector">
+    <Details>
+      <![CDATA[
+<p>オーバーライドしているメソッドのうち、スーパークラスのメソッドを呼び出すべきものを見つけます。</p>
+]]>
+    </Details>
+  </Detector>
   <Detector class="edu.umd.cs.findbugs.detect.FindRoughConstants">
     <Details>
 <![CDATA[
@@ -1998,13 +2005,57 @@ FindNullDeref ディテクタで，非 <code>null</code> 値だけが使われ�
 ]]>
       </Details>
   </Detector>
+  <Detector class="edu.umd.cs.findbugs.detect.DontAssertInstanceofInTests">
+    <Details>
+      <![CDATA[
+        <p>
+          このディテクタは、インスタンスの型を instanceof 演算子を使って検証しているJUnitテストをチェックします。
+        </p>
+        <p>
+          instanceof 演算子を使うと "false is not true" という直感的でないメッセージを
+          伴う例外が記録されます。これは ClassCastException などよりも情報に乏しいため、他の手法を
+          用いることが推奨されます。
+        </p>
+        <p>このディテクタは高速に動作します。</p>
+      ]]>
+    </Details>
+  </Detector>
 
   <!--
   **********************************************************************
   BugPatterns
   **********************************************************************
   -->
+  <BugPattern type="JUA_DONT_ASSERT_INSTANCEOF_IN_TESTS">
+    <ShortDescription> テストコードで instanceof 演算子を用いて型を検証するのは推奨されません。 </ShortDescription>
+    <LongDescription> 型 {0} の検証を {2} の {3} で実行していますが、これは期待通りの挙動が確認されなかった場合に有用な情報が得られません。 </LongDescription>
+    <Details>
+      <![CDATA[
+        <p>
+          テストコードで型を instanceof 演算子を使って検証することは、ClassCastExceptionなどに比べて有用な情報が得られないため
+          推奨されません。
+        </p>
+        <p>
+          デバッグのためには <code>"false is not true"</code> のような意味のない情報よりも、
+          ClassCastException 例外のようにどの型がどの型にキャストできなかったのかを説明できる手法が良いでしょう。
+        </p>
+        <p>
+          もしJUnitをhamcrestと組み合わせて使っているのであれば、 hamcrestの<a href="https://junit.org/junit4/javadoc/latest/index.html?org/hamcrest/core/IsInstanceOf.html"><code>IsInstanceOf</code></a>
+          クラスを使うことが推奨されます。
+        </p>
+      ]]>
+    </Details>
+  </BugPattern>
 
+  <BugPattern type="OVERRIDING_METHODS_MUST_INVOKE_SUPER">
+    <ShortDescription>スーパークラスのメソッドが @OverridingMethodsMustInvokeSuper で修飾されていますが, オーバーライドしているメソッドはスーパークラスのメソッドを呼び出していません。</ShortDescription>
+    <LongDescription>スーパークラスのメソッドが @OverridingMethodsMustInvokeSuper で修飾されていますが, {1}はスーパークラスのメソッドを呼び出していません。</LongDescription>
+    <Details>
+      <![CDATA[
+    <p>スーパークラスのメソッドが @OverridingMethodsMustInvokeSuper で修飾されていますが, オーバーライドしているメソッドはスーパークラスのメソッドを呼び出していません。</p>
+]]>
+    </Details>
+  </BugPattern>
   <BugPattern type="CNT_ROUGH_CONSTANT_VALUE">
     <ShortDescription>既知の定数の雑な値を見つけた</ShortDescription>
     <LongDescription>{3} の雑な値を見つけました: {2}</LongDescription>
@@ -4888,6 +4939,7 @@ public class B extends A {
 フィールドは， <code>transient</code> と宣言していますが，クラスは直列化可能ではないので，まったく効果がありません。
 クラスが <code>transient</code> だったときの名残かもしれません，または直列化機構を誤解しているのかもしれません。
 </p>
+<p><em>このバグは特殊な<tt>reportTransientFieldOfNonSerializableClass</tt>オプションが指定されたときのみ報告されます。</em></p>
 ]]>
     </Details>
   </BugPattern>
@@ -4925,9 +4977,9 @@ public class B extends A {
     <Details>
 <![CDATA[
 <p>
-このクラスは， <code>Externalizable</code> インタフェースを実装していますが，引数なしコンストラクタを定義していません。
-<code>Externalizable</code> オブジェクトが直列化復元されるときは，最初に引数なしコンストラクタを呼び出すことによって構築される必要があります。
-このクラスには引数なしコンストラクタがないので，直列化と直列化復元は実行時に失敗します。
+このクラスは， <code>Externalizable</code> インタフェースを実装していますが，publicな引数なしコンストラクタを定義していません。
+<code>Externalizable</code> オブジェクトが直列化復元されるときは，最初にpublicな引数なしコンストラクタを呼び出すことによって構築される必要があります。
+このクラスにはpublicな引数なしコンストラクタがないので，直列化と直列化復元は実行時に失敗します。
 </p>
 ]]>
     </Details>
@@ -9132,4 +9184,5 @@ Ulf Ochsenfahrt と Eric Fellheimer
   <BugCode abbrev="OBL">ストリームまたはリソースをクリーンアップする責務が満たされていない</BugCode>
   <BugCode abbrev="FB">SpotBugs はメソッドで期待された警告を出さない</BugCode>
   <BugCode abbrev="DL">共有オブジェクトを意図的でなくロックすることによる潜在的デッドロック</BugCode>
+  <BugCode abbrev="JUA">JUnitアサーションの問題</BugCode>
 </MessageCollection>

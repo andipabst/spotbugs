@@ -212,6 +212,9 @@ These options are only accepted by the Text User Interface.
 
   If you want to specify your own XSLT stylesheet to perform the transformation to HTML, specify the option as ``-html:myStylesheet.xsl``, where ``myStylesheet.xsl`` is the filename of the stylesheet you want to use.
 
+-sarif:
+  Produce the bug reports in `SARIF 2.1.0 <https://docs.oasis-open.org/sarif/sarif/v2.1.0/sarif-v2.1.0.html>`_.
+
 -emacs:
   Produce the bug reports in Emacs format.
 
@@ -279,7 +282,7 @@ Output options
   Use training data (experimental); input dir defaults to '.'.
 
 -redoAnalysis <filename>:
-  Redo analysis using configureation from previous analysis.
+  Redo analysis using configuration from previous analysis.
 
 -sourceInfo <filename>:
   Specify source info file (line numbers for fields/classes).

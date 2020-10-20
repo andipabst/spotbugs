@@ -166,6 +166,14 @@ This plugin contains all of the standard SpotBugs detectors.
   Detectors
   **********************************************************************
    -->
+  <Detector class="edu.umd.cs.findbugs.detect.OverridingMethodsMustInvokeSuperDetector">
+    <Details>
+<![CDATA[
+<p> Finds overriding methods that must call super.
+</p>
+]]>
+    </Details>
+  </Detector>
   <Detector class="edu.umd.cs.findbugs.detect.FindRoughConstants">
     <Details>
 <![CDATA[
@@ -1652,11 +1660,54 @@ factory pattern to create these objects.</p>
       ]]>
       </Details>
   </Detector>
+  <Detector class="edu.umd.cs.findbugs.detect.DontAssertInstanceofInTests">
+    <Details>
+      <![CDATA[
+            <p>Detector for patterns in JUnit tests where the type of an object
+               is checked by asserting the instanceof operator.</p>
+            <p>
+               This should be avoided as the ClassCastException that would result
+               from an improper cast may provide more information regarding the
+               cause of the error than a "false is not true" message which would
+               result from asserting the result of the instanceof operator.
+            </p>
+			<p>It is a fast detector</p>
+            ]]>
+    </Details>
+  </Detector>
   <!--
   **********************************************************************
   BugPatterns
   **********************************************************************
    -->
+
+  <BugPattern type="JUA_DONT_ASSERT_INSTANCEOF_IN_TESTS">
+    <ShortDescription> Asserting value of instanceof in tests is not recommended. </ShortDescription>
+    <LongDescription> Assertion of type {0} in {2} at {3} may hide useful information about why a cast may have failed.</LongDescription>
+    <Details>
+      <![CDATA[
+            <p>Asserting type checks in tests is not recommended as a class cast exception message could better indicate
+            the cause of an instance of the wrong class being used than an instanceof assertion.</p>
+
+            <p>When debugging tests that fail due to bad casts, it may be more useful to observe the output of the
+            resulting ClassCastException which could provide information about the actual encountered type.
+            Asserting the type before casting would instead result in a less informative <code>"false is not true"</code>
+            message.</p>
+
+            <p>If JUnit is used with hamcrest, the <a href="https://junit.org/junit4/javadoc/latest/index.html?org/hamcrest/core/IsInstanceOf.html"><code>IsInstanceOf</code></a>
+            class from hamcrest could be used instead.</p>
+            ]]>
+    </Details>
+  </BugPattern>
+
+  <BugPattern type="OVERRIDING_METHODS_MUST_INVOKE_SUPER">
+    <ShortDescription>Super method is annotated with @OverridingMethodsMustInvokeSuper, but the overriding method isn't calling the super method.</ShortDescription>
+    <LongDescription>Super method is annotated with @OverridingMethodsMustInvokeSuper, but {1} isn't calling the super method.</LongDescription>
+    <Details>
+      <![CDATA[
+    <p>Super method is annotated with @OverridingMethodsMustInvokeSuper, but the overriding method isn't calling the super method.</p>
+]]>
+    </Details>  </BugPattern>
   <BugPattern type="CNT_ROUGH_CONSTANT_VALUE">
     <ShortDescription>Rough value of known constant found</ShortDescription>
     <LongDescription>Rough value of {3} found: {2}</LongDescription>
@@ -2983,7 +3034,7 @@ invoking super.equals(o).
     <Details>
 <![CDATA[
   <p> This class defines an equals method that overrides an equals method in a superclass. Both equals methods
-methods use <code>instanceof</code> in the determination of whether two objects are equal. This is fraught with peril,
+use <code>instanceof</code> in the determination of whether two objects are equal. This is fraught with peril,
 since it is important that the equals method is symmetrical (in other words, <code>a.equals(b) == b.equals(a)</code>).
 If B is a subtype of A, and A's equals method checks that the argument is an instanceof A, and B's equals method
 checks that the argument is an instanceof B, it is quite likely that the equivalence relation defined by these
@@ -4329,6 +4380,7 @@ has absolutely no effect.
 This may be leftover marking from a previous version of the code in which the class was transient, or
 it may indicate a misunderstanding of how serialization works.
 </p>
+<p><em>This bug is reported only if special option <tt>reportTransientFieldOfNonSerializableClass</tt> is set.</em></p>
 ]]>
     </Details>
   </BugPattern>
@@ -4360,8 +4412,8 @@ deserialized instance of the class.
     <Details>
 <![CDATA[
   <p> This class implements the <code>Externalizable</code> interface, but does
-  not define a void constructor. When Externalizable objects are deserialized,
-   they first need to be constructed by invoking the void
+  not define a public void constructor. When Externalizable objects are deserialized,
+   they first need to be constructed by invoking the public void
    constructor. Since this class does not have one,
    serialization and deserialization will fail at runtime.</p>
 ]]>
@@ -5600,7 +5652,7 @@ than are different than you would get using <code>.equals(...)</code>.
     <LongDescription>Using pointer equality to compare a {2.givenClass} with a {3.givenClass} in {1}</LongDescription>
     <Details>
 <![CDATA[
-<p> This method uses using pointer equality to compare two references that seem to be of
+<p> This method uses pointer equality to compare two references that seem to be of
 different types.  The result of this comparison will always be false at runtime.
 </p>
 ]]>
@@ -8493,4 +8545,5 @@ after the call to initLogging, the logger configuration is lost
   <BugCode abbrev="OBL">Unsatisfied obligation to clean up stream or resource</BugCode>
   <BugCode abbrev="FB">SpotBugs did not produce the expected warnings on a method</BugCode>
   <BugCode abbrev="DL">Unintended contention or possible deadlock due to locking on shared objects</BugCode>
+  <BugCode abbrev="JUA">Problems in JUnit Assertions</BugCode>
 </MessageCollection>
